@@ -29,6 +29,10 @@ import {
   Icon,
   Select,
   SimpleGrid,
+  Tr,
+  Th,
+  Table,
+  Thead,
   useColorModeValue,
 } from "@chakra-ui/react";
 // Assets
@@ -64,7 +68,28 @@ export default function UserReports() {
   const boxBg = useColorModeValue("secondaryGray.300", "whiteAlpha.100");
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
-      <SimpleGrid
+      <Table variant="simple">
+        <Thead>
+          <Tr>
+            <Th>Datos del cliente</Th>
+            <Th>Fechas de reserva</Th>
+            <Th>Cantidad de asientos</Th>
+          </Tr>
+        </Thead>
+        {/* <Tbody>
+          {data.map((element, index) => {
+            return (
+              <Tr key={index}>
+                <Th>{element.customer.firstname}</Th>
+                <Th>{element.departure.departure_date}</Th>
+                <Th>{element.adults + element.childs}</Th>
+              </Tr>
+            );
+          })}
+        </Tbody> */}
+      </Table>
+      {/* <CheckTable columnsData={columnsDataCheck} tableData={tableDataCheck} /> */}
+      {/* <SimpleGrid
         columns={{ base: 1, md: 2, lg: 3, "2xl": 6 }}
         gap='20px'
         mb='20px'>
@@ -166,7 +191,7 @@ export default function UserReports() {
           <Tasks />
           <MiniCalendar h='100%' minW='100%' selectRange={false} />
         </SimpleGrid>
-      </SimpleGrid>
+      </SimpleGrid> */}
     </Box>
   );
 }

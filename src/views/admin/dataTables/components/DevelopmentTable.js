@@ -9,13 +9,16 @@ import {
   Th,
   Thead,
   Tr,
+  Tfoot,
+  TableCaption,
   useColorModeValue,
 } from "@chakra-ui/react";
+import axios, { AxiosError } from "axios";
 // Custom components
 import Card from "components/card/Card";
 import { AndroidLogo, AppleLogo, WindowsLogo } from "components/icons/Icons";
 import Menu from "components/menu/MainMenu";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   useGlobalFilter,
   usePagination,
@@ -24,164 +27,204 @@ import {
 } from "react-table";
 
 export default function DevelopmentTable(props) {
-  const { columnsData, tableData } = props;
+  const [data, setData] = useState([]);
 
-  const columns = useMemo(() => columnsData, [columnsData]);
-  const data = useMemo(() => tableData, [tableData]);
+  useEffect(() => {
+    const url = "https://amasun.satelital.org/api/v1/bookings";
+    const configHeaders = {
+      headers: {
+        ContentType: "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer 1|mwIpmBWyBSvzLkco5v0bmJGHLhgMYXBXYK3conAC",
+      },
+    };
+    axios.get(url, configHeaders).then((res) => setData(res.data.data));
+  });
 
-  const tableInstance = useTable(
-    {
-      columns,
-      data,
-    },
-    useGlobalFilter,
-    useSortBy,
-    usePagination
-  );
+  console.log(data);
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    page,
-    prepareRow,
-    initialState,
-  } = tableInstance;
-  initialState.pageSize = 11;
-
-  const textColor = useColorModeValue("secondaryGray.900", "white");
-  const iconColor = useColorModeValue("secondaryGray.500", "white");
-  const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
   return (
-    <Card
-      direction='column'
-      w='100%'
-      px='0px'
-      overflowX={{ sm: "scroll", lg: "hidden" }}>
-      <Flex px='25px' justify='space-between' mb='20px' align='center'>
-        <Text
-          color={textColor}
-          fontSize='22px'
-          fontWeight='700'
-          lineHeight='100%'>
-          Development Table
-        </Text>
-        <Menu />
-      </Flex>
-      <Table {...getTableProps()} variant='simple' color='gray.500' mb='24px'>
+    <div>
+      <Table variant="simple">
         <Thead>
-          {headerGroups.map((headerGroup, index) => (
-            <Tr {...headerGroup.getHeaderGroupProps()} key={index}>
-              {headerGroup.headers.map((column, index) => (
-                <Th
-                  {...column.getHeaderProps(column.getSortByToggleProps())}
-                  pe='10px'
-                  key={index}
-                  borderColor={borderColor}>
-                  <Flex
-                    justify='space-between'
-                    align='center'
-                    fontSize={{ sm: "10px", lg: "12px" }}
-                    color='gray.400'>
-                    {column.render("Header")}
-                  </Flex>
-                </Th>
-              ))}
-            </Tr>
-          ))}
+          <Tr>
+            <Th>Datos del cliente</Th>
+            <Th>Fechas de reserva</Th>
+            <Th>Cantidad de asientos</Th>
+          </Tr>
         </Thead>
-        <Tbody {...getTableBodyProps()}>
-          {page.map((row, index) => {
-            prepareRow(row);
+        <Tbody>
+          {data.map((element, index) => {
             return (
-              <Tr {...row.getRowProps()} key={index}>
-                {row.cells.map((cell, index) => {
-                  let data = "";
-                  if (cell.column.Header === "NAME") {
-                    data = (
-                      <Text color={textColor} fontSize='sm' fontWeight='700'>
-                        {cell.value}
-                      </Text>
-                    );
-                  } else if (cell.column.Header === "TECH") {
-                    data = (
-                      <Flex align='center'>
-                        {cell.value.map((item, key) => {
-                          if (item === "apple") {
-                            return (
-                              <AppleLogo
-                                key={key}
-                                color={iconColor}
-                                me='16px'
-                                h='18px'
-                                w='15px'
-                              />
-                            );
-                          } else if (item === "android") {
-                            return (
-                              <AndroidLogo
-                                key={key}
-                                color={iconColor}
-                                me='16px'
-                                h='18px'
-                                w='16px'
-                              />
-                            );
-                          } else if (item === "windows") {
-                            return (
-                              <WindowsLogo
-                                key={key}
-                                color={iconColor}
-                                h='18px'
-                                w='19px'
-                              />
-                            );
-                          }
-                        })}
-                      </Flex>
-                    );
-                  } else if (cell.column.Header === "DATE") {
-                    data = (
-                      <Text color={textColor} fontSize='sm' fontWeight='700'>
-                        {cell.value}
-                      </Text>
-                    );
-                  } else if (cell.column.Header === "PROGRESS") {
-                    data = (
-                      <Flex align='center'>
-                        <Text
-                          me='10px'
-                          color={textColor}
-                          fontSize='sm'
-                          fontWeight='700'>
-                          {cell.value}%
-                        </Text>
-                        <Progress
-                          variant='table'
-                          colorScheme='brandScheme'
-                          h='8px'
-                          w='63px'
-                          value={cell.value}
-                        />
-                      </Flex>
-                    );
-                  }
-                  return (
-                    <Td
-                      {...cell.getCellProps()}
-                      key={index}
-                      fontSize={{ sm: "14px" }}
-                      minW={{ sm: "150px", md: "200px", lg: "auto" }}
-                      borderColor='transparent'>
-                      {data}
-                    </Td>
-                  );
-                })}
+              <Tr key={index}>
+                <Th>{element.customer.firstname}</Th>
+                <Th>{element.departure.departure_date}</Th>
+                <Th>{element.adults + element.childs}</Th>
               </Tr>
             );
           })}
         </Tbody>
       </Table>
-    </Card>
+    </div>
   );
+  // const { columnsData, tableData } = props;
+
+  // const columns = useMemo(() => columnsData, [columnsData]);
+  // const data = useMemo(() => tableData, [tableData]);
+
+  // const tableInstance = useTable(
+  //   {
+  //     columns,
+  //     data,
+  //   },
+  //   useGlobalFilter,
+  //   useSortBy,
+  //   usePagination
+  // );
+
+  // const {
+  //   getTableProps,
+  //   getTableBodyProps,
+  //   headerGroups,
+  //   page,
+  //   prepareRow,
+  //   initialState,
+  // } = tableInstance;
+  // initialState.pageSize = 11;
+
+  // const textColor = useColorModeValue("secondaryGray.900", "white");
+  // const iconColor = useColorModeValue("secondaryGray.500", "white");
+  // const borderColor = useColorModeValue("gray.200", "whiteAlpha.100");
+  // return (
+  //   <Card
+  //     direction='column'
+  //     w='100%'
+  //     px='0px'
+  //     overflowX={{ sm: "scroll", lg: "hidden" }}>
+  //     <Flex px='25px' justify='space-between' mb='20px' align='center'>
+  //       <Text
+  //         color={textColor}
+  //         fontSize='22px'
+  //         fontWeight='700'
+  //         lineHeight='100%'>
+  //         Development Table
+  //       </Text>
+  //       <Menu />
+  //     </Flex>
+  //     <Table {...getTableProps()} variant='simple' color='gray.500' mb='24px'>
+  //       <Thead>
+  //         {headerGroups.map((headerGroup, index) => (
+  //           <Tr {...headerGroup.getHeaderGroupProps()} key={index}>
+  //             {headerGroup.headers.map((column, index) => (
+  //               <Th
+  //                 {...column.getHeaderProps(column.getSortByToggleProps())}
+  //                 pe='10px'
+  //                 key={index}
+  //                 borderColor={borderColor}>
+  //                 <Flex
+  //                   justify='space-between'
+  //                   align='center'
+  //                   fontSize={{ sm: "10px", lg: "12px" }}
+  //                   color='gray.400'>
+  //                   {column.render("Header")}
+  //                 </Flex>
+  //               </Th>
+  //             ))}
+  //           </Tr>
+  //         ))}
+  //       </Thead>
+  //       <Tbody {...getTableBodyProps()}>
+  //         {page.map((row, index) => {
+  //           prepareRow(row);
+  //           return (
+  //             <Tr {...row.getRowProps()} key={index}>
+  //               {row.cells.map((cell, index) => {
+  //                 let data = "";
+  //                 if (cell.column.Header === "NAME") {
+  //                   data = (
+  //                     <Text color={textColor} fontSize='sm' fontWeight='700'>
+  //                       {cell.value}
+  //                     </Text>
+  //                   );
+  //                 } else if (cell.column.Header === "TECH") {
+  //                   data = (
+  //                     <Flex align='center'>
+  //                       {cell.value.map((item, key) => {
+  //                         if (item === "apple") {
+  //                           return (
+  //                             <AppleLogo
+  //                               key={key}
+  //                               color={iconColor}
+  //                               me='16px'
+  //                               h='18px'
+  //                               w='15px'
+  //                             />
+  //                           );
+  //                         } else if (item === "android") {
+  //                           return (
+  //                             <AndroidLogo
+  //                               key={key}
+  //                               color={iconColor}
+  //                               me='16px'
+  //                               h='18px'
+  //                               w='16px'
+  //                             />
+  //                           );
+  //                         } else if (item === "windows") {
+  //                           return (
+  //                             <WindowsLogo
+  //                               key={key}
+  //                               color={iconColor}
+  //                               h='18px'
+  //                               w='19px'
+  //                             />
+  //                           );
+  //                         }
+  //                       })}
+  //                     </Flex>
+  //                   );
+  //                 } else if (cell.column.Header === "DATE") {
+  //                   data = (
+  //                     <Text color={textColor} fontSize='sm' fontWeight='700'>
+  //                       {cell.value}
+  //                     </Text>
+  //                   );
+  //                 } else if (cell.column.Header === "PROGRESS") {
+  //                   data = (
+  //                     <Flex align='center'>
+  //                       <Text
+  //                         me='10px'
+  //                         color={textColor}
+  //                         fontSize='sm'
+  //                         fontWeight='700'>
+  //                         {cell.value}%
+  //                       </Text>
+  //                       <Progress
+  //                         variant='table'
+  //                         colorScheme='brandScheme'
+  //                         h='8px'
+  //                         w='63px'
+  //                         value={cell.value}
+  //                       />
+  //                     </Flex>
+  //                   );
+  //                 }
+  //                 return (
+  //                   <Td
+  //                     {...cell.getCellProps()}
+  //                     key={index}
+  //                     fontSize={{ sm: "14px" }}
+  //                     minW={{ sm: "150px", md: "200px", lg: "auto" }}
+  //                     borderColor='transparent'>
+  //                     {data}
+  //                   </Td>
+  //                 );
+  //               })}
+  //             </Tr>
+  //           );
+  //         })}
+  //       </Tbody>
+  //     </Table>
+  //   </Card>
+  // );
 }
