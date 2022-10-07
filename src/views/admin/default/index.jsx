@@ -31,6 +31,7 @@ import {
   SimpleGrid,
   Tr,
   Th,
+  Tbody,
   Table,
   Thead,
   useColorModeValue,
@@ -41,7 +42,8 @@ import Usa from "assets/img/dashboards/usa.png";
 import MiniCalendar from "components/calendar/MiniCalendar";
 import MiniStatistics from "components/card/MiniStatistics";
 import IconBox from "components/icons/IconBox";
-import React from "react";
+import React, { useState } from "react";
+import { useEffect } from "react";
 import {
   MdAddTask,
   MdAttachMoney,
@@ -61,32 +63,49 @@ import {
 } from "views/admin/default/variables/columnsData";
 import tableDataCheck from "views/admin/default/variables/tableDataCheck.json";
 import tableDataComplex from "views/admin/default/variables/tableDataComplex.json";
-
+import axios from "axios";
 export default function UserReports() {
   // Chakra Color Mode
   const brandColor = useColorModeValue("brand.500", "white");
   const boxBg = useColorModeValue("secondaryGray.300", "whiteAlpha.100");
+
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const url = "https://amasun.satelital.org/api/v1/boats";
+    const configHeaders = {
+      headers: {
+        ContentType: "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer 1|mwIpmBWyBSvzLkco5v0bmJGHLhgMYXBXYK3conAC",
+      },
+    };
+    axios.get(url, configHeaders).then((res) => setData(res.data.data));
+  });
+
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
       <Table variant="simple">
         <Thead>
           <Tr>
-            <Th>Datos del cliente</Th>
-            <Th>Fechas de reserva</Th>
-            <Th>Cantidad de asientos</Th>
+            <Th>Nombre del Tour</Th>
+            <Th>Precio de Ninos</Th>
+            <Th>Precio de adultos</Th>
+            <Th>Ubicacion</Th>
           </Tr>
         </Thead>
-        {/* <Tbody>
+        <Tbody>
           {data.map((element, index) => {
             return (
               <Tr key={index}>
-                <Th>{element.customer.firstname}</Th>
-                <Th>{element.departure.departure_date}</Th>
-                <Th>{element.adults + element.childs}</Th>
+                <Th>{element.boat_name}</Th>
+                <Th>{element.price_adult}</Th>
+                <Th>{element.price_child}</Th>
+                <Th>{element.location}</Th>
               </Tr>
             );
           })}
-        </Tbody> */}
+        </Tbody>
       </Table>
       {/* <CheckTable columnsData={columnsDataCheck} tableData={tableDataCheck} /> */}
       {/* <SimpleGrid

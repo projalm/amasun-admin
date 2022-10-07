@@ -32,6 +32,7 @@ import {
   columnsDataColumns,
   columnsDataComplex,
 } from "views/admin/dataTables/variables/columnsData";
+
 import tableDataDevelopment from "views/admin/dataTables/variables/tableDataDevelopment.json";
 import tableDataCheck from "views/admin/dataTables/variables/tableDataCheck.json";
 import tableDataColumns from "views/admin/dataTables/variables/tableDataColumns.json";
